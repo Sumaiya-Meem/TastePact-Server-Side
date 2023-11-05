@@ -1,7 +1,8 @@
 const express = require('express')
 const cors = require('cors')
-const { MongoClient, ServerApiVersion } = require('mongodb');
 require('dotenv').config()
+const { MongoClient, ServerApiVersion } = require('mongodb');
+
 const app = express()
 const port = process.env.PORT || 5000;
 
@@ -18,10 +19,25 @@ const client = new MongoClient(uri, {
   }
 });
 
+
+
 async function run() {
   try {
-    // Connect the client to the server	(optional starting in v4.7)
+
     await client.connect();
+
+    const addedFoodsCollection = client.db("foodShareWebsite").collection("addedFoods");
+    // POST:> add food
+app.post("/addedFoods",async(req,res)=>{
+  
+        const foodInfo =req.body;
+        console.log("Our Food" ,foodInfo)
+        const result = await addedFoodsCollection.insertOne(foodInfo);
+        res.send(result);
+    
+})
+    // Connect the client to the server	(optional starting in v4.7)
+
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
@@ -33,6 +49,9 @@ async function run() {
 run().catch(console.dir);
 
 
+
+
+
 //middleware
 app.use(cors());
 app.use(express.json())
@@ -42,5 +61,5 @@ app.get('/', (req, res) => {
 })
 
 app.listen(port, () => {
-  console.log(`Website is running on port ${port}`)
+  console.log(`FoodShare Website is running on port ${port}`)
 })
