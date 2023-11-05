@@ -31,11 +31,17 @@ async function run() {
 app.post("/addedFoods",async(req,res)=>{
   
         const foodInfo =req.body;
-        console.log("Our Food" ,foodInfo)
+        // console.log("Our Food" ,foodInfo)
         const result = await addedFoodsCollection.insertOne(foodInfo);
         res.send(result);
     
 })
+//GET:> load food item
+app.get('/addedFoods', async (req, res) => {
+    const cursor = addedFoodsCollection.find()
+    const result = await cursor.toArray();
+    res.send(result);
+  })
     // Connect the client to the server	(optional starting in v4.7)
 
     // Send a ping to confirm a successful connection
