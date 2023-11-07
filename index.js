@@ -76,6 +76,18 @@ async function run() {
             }
         })
 
+
+        // Delete Add Food
+        app.delete("/addedFoods/:id",async(req,res)=>{
+            const id=req.params.id;
+            // res.send(id)
+            const query = { _id: new ObjectId(id) }
+            const result= await addedFoodsCollection.deleteOne(query)
+            res.send(result)
+        })
+
+
+
         // Connect the client to the server	(optional starting in v4.7)
 
         // Send a ping to confirm a successful connection
