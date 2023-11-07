@@ -1,7 +1,7 @@
 const express = require('express')
 const cors = require('cors')
 require('dotenv').config()
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion,ObjectId } = require('mongodb');
 
 const app = express()
 const port = process.env.PORT || 5000;
@@ -38,10 +38,29 @@ app.post("/addedFoods",async(req,res)=>{
 })
 //GET:> load food item
 app.get('/addedFoods', async (req, res) => {
-    const cursor = addedFoodsCollection.find()
+    try{
+        const cursor = addedFoodsCollection.find()
     const result = await cursor.toArray();
     res.send(result);
+    }
+    catch(err){
+        res.send(err)
+    }
   })
+  //GET :> load single food
+  app.get('/addedFoods/:id',async(req,res)=>{
+   try{
+     
+    const query = { _id: new ObjectId(req.params.id) }
+    const result= await addedFoodsCollection.findOne(query)
+    res.send(result)
+   }
+   catch(err){
+    console.log(err);
+    res.send(err)
+   }
+  })
+  
     // Connect the client to the server	(optional starting in v4.7)
 
     // Send a ping to confirm a successful connection
