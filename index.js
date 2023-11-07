@@ -110,6 +110,29 @@ async function run() {
           catch(err){res.send(err)}
 
         })
+        // Update Request food status
+        app.put("/requestFood/:id",async(req,res)=>{
+            try{
+              const id=req.params.id;
+              // res.send(id)
+              const query = { _id: new ObjectId(id) }
+              const body = req.body;
+              console.log(body)
+              res.send(body)
+            //   const updateFood = {
+            //       $set: {
+            //         ...body,
+            //       },
+            //     };
+            //     const options = { upsert: true };
+  
+            //     const result = await requestFoodsCollection.updateOne(query,updateFood,options)
+            //     res.send(result);
+  
+            }
+            catch(err){res.send(err)}
+  
+          })
 
 
         // Delete Add Food
