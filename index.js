@@ -75,15 +75,53 @@ async function run() {
                 res.send(err)
             }
         })
+        // GET :> load request food
+        app.get('/requestFood', async (req, res) => {
+            try {
+                const cursor = requestFoodsCollection.find()
+                const result = await cursor.toArray();
+                res.send(result);
+            }
+            catch (err) {
+                res.send(err)
+            }
+        })
+
+
+        // Update a Food item
+        app.put("/addedFoods/:id",async(req,res)=>{
+          try{
+            const id=req.params.id;
+            // res.send(id)
+            const query = { _id: new ObjectId(id) }
+            const body = req.body;
+            // console.log(body)
+            const updateFood = {
+                $set: {
+                  ...body,
+                },
+              };
+              const options = { upsert: true };
+
+              const result = await addedFoodsCollection.updateOne(query,updateFood,options)
+              res.send(result);
+
+          }
+          catch(err){res.send(err)}
+
+        })
 
 
         // Delete Add Food
         app.delete("/addedFoods/:id",async(req,res)=>{
-            const id=req.params.id;
+            try{
+                const id=req.params.id;
             // res.send(id)
             const query = { _id: new ObjectId(id) }
             const result= await addedFoodsCollection.deleteOne(query)
             res.send(result)
+            }
+            catch(err){res.send(err)}
         })
 
 
