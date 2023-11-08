@@ -9,10 +9,11 @@ const app = express()
 const port = process.env.PORT || 5000;
 
 //middleware
-app.use(cors({
-    origin:['http://localhost:5173','http://localhost:5174'],
-    credentials:true
-}
+app.use(cors(
+//     {
+//     origin:['http://localhost:5173','http://localhost:5174'],
+//     credentials:true
+// }
    
 ));
 app.use(express.json())
@@ -103,25 +104,28 @@ async function run() {
 
 
         //GET:> load food item
-        app.get('/addedFoods',verifyToken, async (req, res) => {
+        app.get('/addedFoods', async (req, res) => {
             try {
-                console.log(req.query.userEmail)
-                // console.log('tok tok token',req.cookies.token)
-                console.log("user in valid token >>>>",req.user)
-                if(req.query.userEmail!==req.user.email){
-                    return res.status(403).send({message:'forbidden access'})
-                }
-                let query ={}
-                if(req.query?.userEmail){
-                    query={userEmail:req.query.userEmail}
-                }
-                const result = await  addedFoodsCollection.find(query).toArray();
-                // console.log(result)
+                const cursor = addedFoodsCollection.find()
+                const result = await cursor.toArray();
                 res.send(result);
-            } catch (err) {
-                res.send(err);
+            }
+            catch (err) {
+                res.send(err)
             }
         })
+        // 
+        app.get('/requestFoods', async (req, res) => {
+            try {
+                const cursor = requestCollection.find()
+                const result = await cursor.toArray();
+                res.send(result);
+            }
+            catch (err) {
+                res.send(err)
+            }
+        })
+
         //GET :> load single food
         app.get('/addedFoods/:id', async (req, res) => {
             try {
@@ -136,26 +140,26 @@ async function run() {
             }
         })
         // GET :> load request food
-        app.get('/requestFoods',verifyToken, async (req, res) => {
+        // app.get('/requestFoods',verifyToken, async (req, res) => {
         
-            try {
-                console.log(req.query.requesterEmail)
-                // console.log('tok tok token',req.cookies.token)
-                console.log("user in valid token >>>>",req.user)
-                if(req.query.requesterEmail!==req.user.email){
-                    return res.status(403).send({message:'forbidden access'})
-                }
-                let query ={}
-                if(req.query?.requesterEmail){
-                    query={requesterEmail:req.query.requesterEmail}
-                }
-                const result = await  requestCollection.find(query).toArray();
-                // console.log(result)
-                res.send(result);
-            } catch (err) {
-                res.send(err);
-            }
-        });
+        //     try {
+        //         console.log(req.query.requesterEmail)
+        //         // console.log('tok tok token',req.cookies.token)
+        //         console.log("user in valid token >>>>",req.user)
+        //         if(req.query.requesterEmail!==req.user.email){
+        //             return res.status(403).send({message:'unauthorized'})
+        //         }
+        //         let query ={}
+        //         if(req.query?.requesterEmail){
+        //             query={requesterEmail:req.query.requesterEmail}
+        //         }
+        //         const result = await  requestCollection.find(query).toArray();
+        //         // console.log(result)
+        //         res.send(result);
+        //     } catch (err) {
+        //         res.send(err);
+        //     }
+        // });
         // GET :> load single request food
         app.get('/requestFoods/:id', async (req, res) => {
             try {
