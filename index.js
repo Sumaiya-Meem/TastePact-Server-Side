@@ -1,5 +1,6 @@
 const express = require('express')
 const cors = require('cors')
+var jwt = require('jsonwebtoken');
 require('dotenv').config()
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 
@@ -27,7 +28,21 @@ async function run() {
         await client.connect();
 
         const addedFoodsCollection = client.db("foodShareWebsite").collection("addedFoods");
-        const requestFoodsCollection = client.db("foodShareWebsite").collection("requestFood");
+        // const requestFoodsCollection = client.db("foodShareWebsite").collection("requestFood");
+        const requestCollection = client.db("foodShareWebsite").collection("requestFoods");
+
+
+
+        // jwt 
+        app.post('/jwt',async(req,res)=>{
+            const user = req.body;
+            console.log(user)
+            const token = jwt.sign(user,process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' })
+            res.send(token)
+        })
+
+
+
         // POST:> add food
         app.post("/addedFoods", async (req, res) => {
 
@@ -39,15 +54,12 @@ async function run() {
         })
 
         // POST:> add request food
-        app.post("/requestFood", async (req, res) => {
-
+        app.post("/requestFoods", async (req, res) => {
             const requestFoodInfo = req.body;
-            console.log("Request Food" ,requestFoodInfo )
-            // res.send(requestFoodInfo)
-            const result = await requestFoodsCollection.insertOne(requestFoodInfo );
+            console.log("Request Food", requestFoodInfo);
+            const result = await requestCollection.insertOne(requestFoodInfo);
             res.send(result);
-
-        })
+        });
 
 
 
@@ -76,16 +88,33 @@ async function run() {
             }
         })
         // GET :> load request food
-        app.get('/requestFood', async (req, res) => {
+        app.get('/requestFoods', async (req, res) => {
             try {
-                const cursor = requestFoodsCollection.find()
+                const cursor = requestCollection.find();
                 const result = await cursor.toArray();
                 res.send(result);
+            } catch (err) {
+                res.send(err);
             }
-            catch (err) {
-                res.send(err)
+        });
+        // GET :> load single request food
+        app.get('/requestFoods/:id', async (req, res) => {
+            try {
+                const requestedId = req.params.id;
+                console.log("Requested ID:", requestedId);
+        
+                const query = { _id: new ObjectId(requestedId) };
+                console.log("Query:", query);
+        
+                const result = await requestCollection.findOne(query);
+                console.log("Result:", result);
+        
+                res.send(result);
+            } catch (err) {
+                console.log(err);
+                res.send(err);
             }
-        })
+        });
 
 
         // Update a Food item
@@ -111,28 +140,29 @@ async function run() {
 
         })
         // Update Request food status
-        app.put("/requestFood/:id",async(req,res)=>{
-            try{
-              const id=req.params.id;
-              // res.send(id)
-              const query = { _id: new ObjectId(id) }
-              const body = req.body;
-              console.log(body)
-              res.send(body)
-            //   const updateFood = {
-            //       $set: {
-            //         ...body,
-            //       },
-            //     };
-            //     const options = { upsert: true };
-  
-            //     const result = await requestFoodsCollection.updateOne(query,updateFood,options)
-            //     res.send(result);
-  
+        app.put('/requestFoods/:id', async (req, res) => {
+            try {
+              const id = req.params.id; // Get food item ID from the URL parameter
+              
+              // Find the food item by its ID and update its status to 'delivered'
+              const filter = { _id: new ObjectId(id) };
+              const update = { $set: { status: 'delivered' } };
+          
+              // Update the document in the collection
+              const result = await requestCollection.updateOne(filter, update);
+          
+              if (result.modifiedCount > 0) {
+                res.send({ message: 'Food status updated to delivered' });
+              } else {
+                res.status(404).send({ error: 'Food item not found' });
+              }
+            } catch (err) {
+              res.status(500).send({ error: err.message });
             }
-            catch(err){res.send(err)}
-  
-          })
+          });
+          
+          
+              
 
 
         // Delete Add Food
@@ -142,6 +172,19 @@ async function run() {
             // res.send(id)
             const query = { _id: new ObjectId(id) }
             const result= await addedFoodsCollection.deleteOne(query)
+            res.send(result)
+            }
+            catch(err){res.send(err)}
+        })
+        // Delete request Food
+        app.delete("/requestFoods/:id",async(req,res)=>{
+            try{
+                const id=req.params.id;
+            console.log(id)
+            const query = { _id: new ObjectId(id) }
+            console.log(query)
+            const result= await requestCollection.deleteOne(query)
+            console.log(result)
             res.send(result)
             }
             catch(err){res.send(err)}
